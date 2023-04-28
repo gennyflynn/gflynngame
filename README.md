@@ -1,9 +1,27 @@
-Tech stack: 
+# gflynngame 
+
+## Tech stack: 
 
 Server: Python, Flask
+
 Client: Typescript, React
 
-To run server:
-cd into game-server/src/server
-run poetry run flask run 
-Runs on port 5000 (need to look into how to change this)
+
+## Running Locally
+
+### Server 
+
+```
+    cd game-server/src/server
+    poetry run flask run 
+```
+
+This currently runs on port 5000. 
+(May conflict with airplay on M1 Macs).
+
+### Client
+
+```
+    cd client
+    yarn start
+```

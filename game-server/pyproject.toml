@@ -9,7 +9,9 @@ packages = [{include = "server", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 flask = "^2.3.1"
-python-dotenv = "1.0.0"
+python-dotenv = "^1.0.0"
+flask-cors = "^3.0.10"
+flask-socketio = "^5.3.3"
 
 [build-system]
 requires = ["poetry-core"]
