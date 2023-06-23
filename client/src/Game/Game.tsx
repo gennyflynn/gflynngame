@@ -3,6 +3,7 @@ import { socket } from "../Socket/socket";
 import { ConnectionManager } from "./ConnectionManager";
 import { ConnectionState } from "./ConnectionState";
 import { Events } from "./Event";
+import Home from "./Home";
 
 export default function Game() {
     const [isConnected, setIsConnected]: any = useState(socket.connected);
@@ -33,6 +34,7 @@ export default function Game() {
     }, []);
     return (
     <div className="Game">
+        <Home></Home>
         <ConnectionState isConnected={ isConnected } />
         <Events events={ fooEvents } />
         <ConnectionManager />
