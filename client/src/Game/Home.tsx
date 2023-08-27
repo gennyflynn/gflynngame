@@ -7,15 +7,22 @@ export default function Home() {
     const [roomId, setRoomId] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     
-    const gameTitle = "game-anon"
+    const gameTitle = "secret hitler"
 
     function joinLobby(event: any) {
         event.preventDefault()
         // setIsLoading(true);
 
-        // hmm can emit like a real time anonymous voting platform
-        socket.emit("lobby/create", socket.id, {'name': 'genny'})
-        
+        socket.emit("lobby/join", socket.id, {'lobby_id': roomId, 'name': name})
+    }
+
+    function createLobby(){
+        // update so this reads the lobby ID from the response and sets it here. 
+        socket.emit("lobby/create", socket.id, {'name': name})
+    }
+
+    function startGame(){
+        socket.emit("game/start", socket.id, {'lobby_id': roomId})
     }
 
     return (
@@ -24,8 +31,10 @@ export default function Home() {
             <form onSubmit={joinLobby}>
                 <input type="text" onChange={ e => setName(e.target.value)} placeholder="Enter your name"></input>
                 <input type="text" onChange={ e => setRoomId(e.target.value)} placeholder="Lobby ID"></input>
-                <button type="submit" disabled={isLoading}>Submit</button>
+                <button type="submit" disabled={isLoading}>Join Lobby</button>
             </form>
+            <button onClick={createLobby}>Create Lobby</button>
+            <button onClick={startGame}>Start Game</button>
         </HomeWrapper>
     )
 }

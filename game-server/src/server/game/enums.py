@@ -4,5 +4,7 @@ class PartyMembership(Enum):
     FASCIST = "fascist"
     LIBERAL = "liberal"
 
-class SecretRole(PartyMembership):
+class SecretRole(Enum):
     HITLER = "hitler"
+    FASCIST = PartyMembership.FASCIST
+    LIBERAL = PartyMembership.LIBERAL
