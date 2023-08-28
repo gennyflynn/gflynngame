@@ -22,7 +22,7 @@ def handle_disconnect():
 
 @socketio.on("lobby/join")
 def handle_join_lobby(sid, data):
-    lobby_id = data['lobby_id']
+    lobby_id = data['lobbyId']
     lobby = lobby_manager.get_lobby(lobby_id)
 
     if lobby:
@@ -31,15 +31,27 @@ def handle_join_lobby(sid, data):
 
         if lobby.is_active:
             socketio.emit(GAME_EXCEPTIONS.ONGOING_GAME.value)
-
-        join_room(lobby_id)
        
         lobby.join_lobby(User(
             sid=sid,
             name=data['name'],
         ))
+        userJoindata = {
+            "lobbyId": str(lobby_id),
+            "usersInRoom": [user.name for _, user in lobby.users.items()]
+        }
+        roomJoinData = {
+            "lobbyId": str(lobby_id),
+            "newUserName": data['name'],
+        }
+        join_room(lobby_id)
+        socketio.emit(event="lobby/join/success", data=userJoindata, to=sid)
+        socketio.emit(event="lobby/join/user", data=roomJoinData, to=lobby_id)
 
-        socketio.emit(event="lobby/join/success", data={"lobbyId": lobby_id}, to=sid)
+        # when the lobby is joined, the user who joins needs a list of every one else in the lobby.
+        # users in the room already need to be updated with the new user.
+        # we should use their names and not IDs. 
+
     else:
         socketio.emit(GAME_EXCEPTIONS.LOBBY_NOT_FOUND.value)
 
@@ -48,8 +60,6 @@ def handle_join_lobby(sid, data):
 def handle_create_lobby(sid, data):
     # refactor so that the lobby ID is returned from the lobby manager.
     lobby_id = uuid1()
-    
-    join_room(lobby_id)
 
     lobby = lobby_manager.create_lobby(str(lobby_id))
 
@@ -57,13 +67,14 @@ def handle_create_lobby(sid, data):
         sid=sid,
         name=data['name'],
     ))
+    join_room(lobby_id)
 
-    socketio.emit(event="lobby/create/success", data={"lobbyId": lobby_id}, to=sid)
+    socketio.emit(event="lobby/create/success", data={"lobbyId": str(lobby_id)}, to=sid)
 
 
 @socketio.on("game/start")
 def handle_start_game(sid, data):
-    lobby_id = data['lobby_id']
+    lobby_id = data['lobbyId']
 
     lobby = lobby_manager.get_lobby(lobby_id)
 

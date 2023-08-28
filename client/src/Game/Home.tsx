@@ -8,33 +8,32 @@ export type LobbyType = {
 }
 
 export default function Home() {
-    const [name, setName] = useState("");
     const [roomId, setRoomId] = useState("");
-    const { setLobbyId } = useContext(GameContext);
+    const { name, setName, setLobbyId, usersInLobby, setUsersInLobby } = useContext(GameContext);
     
     const gameTitle = "secret hitler"
 
     function joinLobby(event: any) {
         event.preventDefault()
-        socket.emit("lobby/join", socket.id, {'lobby_id': roomId, 'name': name})
-        setLobbyId(roomId)
+        socket.emit("lobby/join", socket.id, {'lobbyId': roomId, 'name': name})
     }
 
     function createLobby(){
-        // update so this reads the lobby ID from the response and sets it here. 
+        // Update so this reads the lobby ID from the response and sets it here. 
         socket.emit("lobby/create", socket.id, {'name': name})
     }
 
     function startGame(){
-        socket.emit("game/start", socket.id, {'lobby_id': roomId})
+        socket.emit("game/start", socket.id, {'lobbyId': roomId})
     }
 
     useEffect(() => {
         socket.on("lobby/join/success", (data) => {
-
+            setUsersInLobby(data.usersInRoom)
             setLobbyId(data.lobbyId)
         })
         socket.on("lobby/create/success", (data) => {
+            setUsersInLobby([name])
             setLobbyId(data.lobbyId)
         })
         return () => {
@@ -42,7 +41,7 @@ export default function Home() {
             socket.off("lobby/join/success");
             socket.off("lobby/create/success");
         };
-    }, [setLobbyId])
+    }, [name, setLobbyId, setUsersInLobby])
 
     // TODO: add form validation. 
     return (
