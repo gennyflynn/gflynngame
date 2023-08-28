@@ -1,10 +1,10 @@
 import styled from 'styled-components';
-import Game from './Game/Game';
+import AppHome from './Game/AppHome';
 
 function App() {
   return (
     <Wrapper>
-      <Game></Game>
+      <AppHome></AppHome>
     </Wrapper>
 
   );

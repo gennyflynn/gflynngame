@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { socket } from "../Socket/socket";
-import { ConnectionManager } from "./ConnectionManager";
 import { ConnectionState } from "./ConnectionState";
-import { Events } from "./Event";
-import Home from "./Home";
+import { GameContextProvider } from "./GameContext";
+import GameRouter from "./GameRouter";
 
-export default function Game() {
+export default function AppHome() {
     const [isConnected, setIsConnected]: any = useState(socket.connected);
-    const [fooEvents, setFooEvents]: any = useState([]);
     
     function onConnect() {
       setIsConnected(true)
@@ -17,20 +15,19 @@ export default function Game() {
       setIsConnected(false)
     }
   
-    function onFooEvent(value: any) {
-      setFooEvents((previous: any) => [...previous, value])
-    }
-  
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
-    socket.on('foo', onFooEvent);
+
+    const useEffect = () => {
+      socket.connect();
+    }
     
     return (
     <div className="Game">
-        <Home></Home>
+      <GameContextProvider>
+        <GameRouter/>
         <ConnectionState isConnected={ isConnected } />
-        <Events events={ fooEvents } />
-        <ConnectionManager />
+      </GameContextProvider>
     </div>
     )
 }
