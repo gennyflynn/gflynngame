@@ -9,7 +9,7 @@ print('\n\n\nStarting server and lobby manager...')
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'dev-secret-key'
-socketio = SocketIO(app, logger=True, cors_allowed_origins="*")
+socketio = SocketIO(app, logger=True, engineio_logger=False, cors_allowed_origins="*")
 
 CORS(app)
 

@@ -24,21 +24,23 @@ export default function Home() {
         socket.emit("lobby/create", socket.id, {'name': name})
     }
 
-    function startGame(){
-        socket.emit("game/start", socket.id, {'lobbyId': roomId})
-    }
-
     useEffect(() => {
         socket.on("lobby/join/success", (data) => {
             setUsersInLobby(data.usersInRoom)
             setLobbyId(data.lobbyId)
+            // Join the corresponding room on the client.
+            socket.emit("join", data.lobbyId)
+            console.log('successfully joined lobby: ', data.lobbyId)
         })
         socket.on("lobby/create/success", (data) => {
             setUsersInLobby([name])
             setLobbyId(data.lobbyId)
+            // Join the corresponding room on the client.
+            socket.emit("join", data.lobbyId)
+            console.log('successfully created lobby: ', data.lobbyId)
         })
         return () => {
-            // This will clean up the component when it unmounts.
+            /* This will clean up the component when it unmounts. */ 
             socket.off("lobby/join/success");
             socket.off("lobby/create/success");
         };
@@ -54,7 +56,6 @@ export default function Home() {
                 <button type="submit">Join Lobby</button>
             </form>
             <button onClick={createLobby}>Create Lobby</button>
-            <button onClick={startGame}>Start Game</button>
         </HomeWrapper>
     )
 }

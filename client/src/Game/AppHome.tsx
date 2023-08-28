@@ -6,14 +6,13 @@ import GameRouter from "./GameRouter";
 
 export default function AppHome() {
     return (
-    <div className="Game">
+    <div className="AppHome">
       <SocketContextProvider>
         <GameContextProvider>
           <GameRouter/>
           <ConnectionState />
         </GameContextProvider>
       </SocketContextProvider>
-      
     </div>
     )
 }

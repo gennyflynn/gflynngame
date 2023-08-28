@@ -1,6 +1,6 @@
 import { useContext, useMemo } from "react";
 import { GameContext } from "./GameContext";
-import Game from "./AppHome";
+import Game from "./Game";
 import Lobby from "./Lobby";
 import Home from "./Home";
 

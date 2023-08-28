@@ -60,26 +60,22 @@ def handle_join_lobby(sid, data):
 def handle_create_lobby(sid, data):
     # refactor so that the lobby ID is returned from the lobby manager.
     lobby_id = uuid1()
-
     lobby = lobby_manager.create_lobby(str(lobby_id))
 
     lobby.join_lobby(User(
         sid=sid,
         name=data['name'],
     ))
-    join_room(lobby_id)
 
+    join_room(lobby_id)
     socketio.emit(event="lobby/create/success", data={"lobbyId": str(lobby_id)}, to=sid)
 
 
 @socketio.on("game/start")
 def handle_start_game(sid, data):
     lobby_id = data['lobbyId']
-
     lobby = lobby_manager.get_lobby(lobby_id)
-
     lobby.start_game()
-
     socketio.emit("game/start/success", {"message":'started game...'}, room=lobby_id)
 #     lobby = lobbies[data['lobby_id']]
 #     lobby.start_game()
