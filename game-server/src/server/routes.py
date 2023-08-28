@@ -39,7 +39,7 @@ def handle_join_lobby(sid, data):
             name=data['name'],
         ))
 
-        socketio.emit(event="lobby/join/success", data={"lobbyId": lobby_id})
+        socketio.emit(event="lobby/join/success", data={"lobbyId": lobby_id}, to=sid)
     else:
         socketio.emit(GAME_EXCEPTIONS.LOBBY_NOT_FOUND.value)
 
@@ -58,10 +58,7 @@ def handle_create_lobby(sid, data):
         name=data['name'],
     ))
 
-    data = {
-        "lobbyId": str(lobby_id),
-    }
-    socketio.emit(event="lobby/create/success", data=data)
+    socketio.emit(event="lobby/create/success", data={"lobbyId": lobby_id}, to=sid)
 
 
 @socketio.on("game/start")
