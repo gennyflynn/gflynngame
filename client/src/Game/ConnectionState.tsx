@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { SocketContext } from './SocketContext';
 
-export function ConnectionState({ isConnected }: {isConnected : any}) {
-    return <p>State: {'' + isConnected}</p>
+export function ConnectionState() {
+    const {socketConnected} = useContext(SocketContext)
+    return <p>State: {'' + socketConnected}</p>
 }

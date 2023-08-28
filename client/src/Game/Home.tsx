@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import styled from "styled-components";
-import { socket } from "../Socket/socket";
+import { SocketContext } from './SocketContext';
 import { GameContext } from "./GameContext";
 
 export type LobbyType = {
@@ -9,7 +9,8 @@ export type LobbyType = {
 
 export default function Home() {
     const [roomId, setRoomId] = useState("");
-    const { name, setName, setLobbyId, usersInLobby, setUsersInLobby } = useContext(GameContext);
+    const { name, setName, setLobbyId, setUsersInLobby } = useContext(GameContext);
+    const { socket } = useContext(SocketContext);
     
     const gameTitle = "secret hitler"
 
@@ -41,7 +42,7 @@ export default function Home() {
             socket.off("lobby/join/success");
             socket.off("lobby/create/success");
         };
-    }, [name, setLobbyId, setUsersInLobby])
+    }, [name, setLobbyId, setUsersInLobby, socket])
 
     // TODO: add form validation. 
     return (

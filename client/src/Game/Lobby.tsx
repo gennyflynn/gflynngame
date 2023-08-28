@@ -1,16 +1,18 @@
 import { useContext, useEffect } from "react";
 import { GameContext } from "./GameContext";
-import { socket } from "../Socket/socket";
+import { SocketContext } from "./SocketContext";
 
 export default function Lobby() {
     const { lobbyId, usersInLobby, setUsersInLobby } = useContext(GameContext);
+    const {socket} = useContext(SocketContext);
 
     useEffect(() => {
+        // lobby/join/user
         socket.on("lobby/join/user", (data) => {
-            setUsersInLobby([...usersInLobby, data.newUserName])
+            setUsersInLobby([...usersInLobby, data.newUserName]) 
         })
 
-    }, [setUsersInLobby, usersInLobby])
+    }, [setUsersInLobby, socket, usersInLobby])
 
     return (
     <div>Lobby {lobbyId}

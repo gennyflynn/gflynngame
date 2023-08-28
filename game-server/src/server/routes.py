@@ -53,7 +53,7 @@ def handle_join_lobby(sid, data):
         # we should use their names and not IDs. 
 
     else:
-        socketio.emit(GAME_EXCEPTIONS.LOBBY_NOT_FOUND.value)
+        socketio.emit(event=GAME_EXCEPTIONS.LOBBY_NOT_FOUND.value, to=sid)
 
 
 @socketio.on("lobby/create")
@@ -87,3 +87,7 @@ def handle_start_game(sid, data):
 #  between the user and their lobby.
 # can ask the lobby manager -> what lobby and game the user is in.
 # For display purposes, we will want to have list of other users in the game. 
+
+
+# need to add cleanup function for when a client disconnects to remove them 
+# from the lobby and game. 
