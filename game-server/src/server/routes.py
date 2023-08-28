@@ -5,13 +5,13 @@ from .game.user import User
 
 from .game.lobby import Lobby
 from server.app import socketio
-from flask_socketio import emit, join_room
+from flask_socketio import join_room
 from server.extensions import lobby_manager
 from .game.game_exceptions import GAME_EXCEPTIONS
 
 @socketio.on("connect")
 def handle_connect():
-    emit("connected")
+    socketio.emit("connected")
     print('\n\n\n client connected\n\n')
 
 
@@ -27,10 +27,10 @@ def handle_join_lobby(sid, data):
 
     if lobby:
         if lobby.is_full():
-            emit(GAME_EXCEPTIONS.LOBBY_IS_FULL.value)
+            socketio.emit(GAME_EXCEPTIONS.LOBBY_IS_FULL.value)
 
         if lobby.is_active:
-            emit(GAME_EXCEPTIONS.ONGOING_GAME.value)
+            socketio.emit(GAME_EXCEPTIONS.ONGOING_GAME.value)
 
         join_room(lobby_id)
        
@@ -39,9 +39,9 @@ def handle_join_lobby(sid, data):
             name=data['name'],
         ))
 
-        emit(f'{sid} joined lobby: {lobby_id}')
+        socketio.emit(event="lobby/join/success", data={"lobbyId": lobby_id})
     else:
-        emit(GAME_EXCEPTIONS.LOBBY_NOT_FOUND.value)
+        socketio.emit(GAME_EXCEPTIONS.LOBBY_NOT_FOUND.value)
 
 
 @socketio.on("lobby/create")
@@ -58,7 +58,10 @@ def handle_create_lobby(sid, data):
         name=data['name'],
     ))
 
-    emit(f'created lobby_id: {lobby_id}')
+    data = {
+        "lobbyId": str(lobby_id),
+    }
+    socketio.emit(event="lobby/create/success", data=data)
 
 
 @socketio.on("game/start")
@@ -69,7 +72,7 @@ def handle_start_game(sid, data):
 
     lobby.start_game()
 
-    emit(message='started game...', room=lobby_id)
+    socketio.emit("game/start/success", {"message":'started game...'}, room=lobby_id)
 #     lobby = lobbies[data['lobby_id']]
 #     lobby.start_game()
 # would be nice to have an association

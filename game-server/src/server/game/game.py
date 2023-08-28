@@ -53,9 +53,7 @@ class Game:
         num_players = len(self.users)
         num_liberals = NUMBER_OF_LIBERALS_PER_GAME[num_players]
         user_ids = list(self.users.keys())
-        breakpoint()
         shuffle(user_ids)
-        breakpoint()
 
         for id in user_ids[:num_liberals]:
             user = self.users[id]
