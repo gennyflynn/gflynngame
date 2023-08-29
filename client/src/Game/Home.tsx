@@ -9,7 +9,7 @@ export type LobbyType = {
 
 export default function Home() {
     const [roomId, setRoomId] = useState("");
-    const { name, setName, setLobbyId, setUsersInLobby } = useContext(GameContext);
+    const { name, setName, setLobbyId, setUsersInLobby, setIsGameCreator } = useContext(GameContext);
     const { socket } = useContext(SocketContext);
     
     const gameTitle = "secret hitler"
@@ -27,24 +27,21 @@ export default function Home() {
     useEffect(() => {
         socket.on("lobby/join/success", (data) => {
             setUsersInLobby(data.usersInRoom)
-            setLobbyId(data.lobbyId)
-            // Join the corresponding room on the client.
-            socket.emit("join", data.lobbyId)
-            console.log('successfully joined lobby: ', data.lobbyId)
+            // console.log(data.lobbyId)
+            setLobbyId(data.lobbyId)            
         })
         socket.on("lobby/create/success", (data) => {
             setUsersInLobby([name])
             setLobbyId(data.lobbyId)
-            // Join the corresponding room on the client.
-            socket.emit("join", data.lobbyId)
-            console.log('successfully created lobby: ', data.lobbyId)
+            // console.log(data.lobbyId)
+            setIsGameCreator(true)
         })
         return () => {
             /* This will clean up the component when it unmounts. */ 
             socket.off("lobby/join/success");
             socket.off("lobby/create/success");
         };
-    }, [name, setLobbyId, setUsersInLobby, socket])
+    }, [name, setIsGameCreator, setLobbyId, setUsersInLobby, socket])
 
     // TODO: add form validation. 
     return (

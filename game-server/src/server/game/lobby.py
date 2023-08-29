@@ -36,7 +36,7 @@ class Lobby:
             raise Exception(msg=GAME_EXCEPTIONS.NOT_ENOUGH_PLAYERS)
         
         self.game = Game(self.users)
-        is_active = True
+        self.is_active = True
         return self.game
         
     def join_lobby(self, user: User):

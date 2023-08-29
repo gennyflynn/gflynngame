@@ -3,6 +3,7 @@ import { GameContext } from "./GameContext";
 import Game from "./Game";
 import Lobby from "./Lobby";
 import Home from "./Home";
+import { SecretHitlerContextProvider } from "./SecretHitlerContext";
 
 export default function GameRouter() {
     const { lobbyId, inGame } = useContext(GameContext);
@@ -15,5 +16,9 @@ export default function GameRouter() {
         } else return <Home />;
     }, [lobbyId, inGame]);
 
-    return componentToShow;
+    return ( 
+        <SecretHitlerContextProvider>
+            {componentToShow}
+        </SecretHitlerContextProvider>)
+    ;
 }

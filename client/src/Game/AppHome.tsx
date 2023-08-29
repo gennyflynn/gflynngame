@@ -3,16 +3,22 @@ import { SocketContextProvider } from "./SocketContext";
 import { ConnectionState } from "./ConnectionState";
 import { GameContextProvider } from "./GameContext";
 import GameRouter from "./GameRouter";
+import styled from "styled-components";
 
 export default function AppHome() {
     return (
-    <div className="AppHome">
+    <Home className="AppHome">
       <SocketContextProvider>
         <GameContextProvider>
+          <h2>Secret Hitler</h2>
           <GameRouter/>
           <ConnectionState />
         </GameContextProvider>
       </SocketContextProvider>
-    </div>
+    </Home>
     )
 }
+
+const Home = styled.div`
+  padding: 30px;
+`;

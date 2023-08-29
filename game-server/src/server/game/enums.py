@@ -6,5 +6,5 @@ class PartyMembership(Enum):
 
 class SecretRole(Enum):
     HITLER = "hitler"
-    FASCIST = PartyMembership.FASCIST
-    LIBERAL = PartyMembership.LIBERAL
+    FASCIST = PartyMembership.FASCIST.value
+    LIBERAL = PartyMembership.LIBERAL.value

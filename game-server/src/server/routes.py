@@ -1,11 +1,13 @@
-from typing import List
+from typing import List, Optional
 from uuid import uuid1
+
+from .game.enums import PartyMembership, SecretRole
 
 from .game.user import User
 
 from .game.lobby import Lobby
 from server.app import socketio
-from flask_socketio import join_room
+from flask_socketio import join_room, send
 from server.extensions import lobby_manager
 from .game.game_exceptions import GAME_EXCEPTIONS
 
@@ -46,7 +48,9 @@ def handle_join_lobby(sid, data):
         }
         join_room(lobby_id)
         socketio.emit(event="lobby/join/success", data=userJoindata, to=sid)
-        socketio.emit(event="lobby/join/user", data=roomJoinData, to=lobby_id)
+        # workaround because it doesnt seem to be possible to emit to all users in a room
+        for sid in lobby.users.keys():
+            socketio.emit(event="lobby/join/user", data=roomJoinData, to=sid)
 
         # when the lobby is joined, the user who joins needs a list of every one else in the lobby.
         # users in the room already need to be updated with the new user.
@@ -61,22 +65,44 @@ def handle_create_lobby(sid, data):
     # refactor so that the lobby ID is returned from the lobby manager.
     lobby_id = uuid1()
     lobby = lobby_manager.create_lobby(str(lobby_id))
-
     lobby.join_lobby(User(
         sid=sid,
         name=data['name'],
     ))
-
     join_room(lobby_id)
     socketio.emit(event="lobby/create/success", data={"lobbyId": str(lobby_id)}, to=sid)
-
 
 @socketio.on("game/start")
 def handle_start_game(sid, data):
     lobby_id = data['lobbyId']
     lobby = lobby_manager.get_lobby(lobby_id)
-    lobby.start_game()
-    socketio.emit("game/start/success", {"message":'started game...'}, room=lobby_id)
+    game = lobby.start_game()
+    chancellor_candidate = game.chancellor_candidate().name
+
+    for user in game.users.values():
+        hitler = (
+            game.users[game.hitler_user_id].name 
+            if user.profile.party_membership is PartyMembership.FASCIST 
+            else ""
+        )
+        
+        send_fascist_info = user.profile.party_membership is PartyMembership.FASCIST and user.profile.role is SecretRole.FASCIST  
+        fascists = [ game.users[id].name for id in game.fascists_user_ids ] if send_fascist_info else []
+
+        resp = {
+            "partyMembership": user.profile.party_membership.value,
+            "role": user.profile.role.value,
+            "chancellorCandidate": chancellor_candidate,
+            "hitler": hitler,
+            "fascists": fascists
+        }
+        socketio.emit(event="game/start", data=resp, to=user.sid)
+
+
+# @socketio.on("join")
+# def handle_start_game(sid, data: Optional[any]):
+#     if data:
+#         print(f'\n\n\n\n join data: {data}\n\n\n\n')
 #     lobby = lobbies[data['lobby_id']]
 #     lobby.start_game()
 # would be nice to have an association
@@ -87,3 +113,26 @@ def handle_start_game(sid, data):
 
 # need to add cleanup function for when a client disconnects to remove them 
 # from the lobby and game. 
+
+
+"""
+Some response design ideas:
+
+General Game State:
+    resp = {
+        party_membership: PartyMembership
+        role: SecretRole
+        chancellor: bool
+        # Chancellor candidate will be empty always. 
+        # We can define this is always send back the response.
+        chancellor_candidate: bool
+    }
+
+On Card Selection
+resp = {
+    // This will be a list of 3
+    cards: [
+        PartyMembership
+    ], 
+}
+"""

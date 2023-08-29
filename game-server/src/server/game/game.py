@@ -20,7 +20,9 @@ class Game:
     users: Dict[str, User]
     cards: List[PartyMembership]
     card_iter: Iterator
+    chancellor_candidate_iter: Iterator
     hitler_user_id: str
+    fascists_user_ids: List[str]
 
     def __init__(self, users: Dict[str, User]):
         # Setup the random cards.
@@ -36,8 +38,10 @@ class Game:
         shuffle(self.cards)
         self.card_iter = iter(self.cards)
 
-        # assign roles and hitler
+        # Assign roles, hitler, and start chancellor rotation.
         self.users = users
+        self.chancellor_candidate_iter = iter(self.users.keys())
+
         self.assign_roles()
 
 
@@ -62,13 +66,18 @@ class Game:
                 role=SecretRole.LIBERAL
             )
 
+        self.fascists_user_ids = []
+
         for id in user_ids[num_liberals:]:
             user = self.users[id]
             user.profile = PlayerProfile(
                 party_membership=PartyMembership.FASCIST,
                 role=SecretRole.FASCIST
             ) 
-        
+            self.fascists_user_ids.append(id)
+
+        # Remove Hitler from list.
+        self.fascists_user_ids.pop()
         self.users[user_ids[-1]].profile = PlayerProfile(
             party_membership=PartyMembership.FASCIST,
             role=SecretRole.HITLER
@@ -87,6 +96,15 @@ class Game:
         shuffle(self.cards)
         self.card_iter = iter(self.cards)
         return next(self.card_iter)
+    
+    def chancellor_candidate(self):
+        candidate = next(self.chancellor_candidate_iter, None)
+
+        if candidate is None:
+            self.chancellor_candidate_iter = iter(self.users.keys())
+            return self.users[next(self.chancellor_candidate_iter)]
+        
+        return self.users[candidate]
 
 
     # def start_game():
