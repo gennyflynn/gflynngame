@@ -117,20 +117,12 @@ def handle_vote(sid, data):
     vote = Vote(str(vote))
     result = game.vote(vote)
 
-    print(game.vote_manager)
-
     if result:
-        # we can also just be smart on the server and know when the vote is over,
+        resp = {"votes": [vote.value for vote in game.vote_manager.votes], "votePassed": result.value}
         for sid in game.users.keys():
-            socketio.emit('game/vote/pass', data={"votePassed": result.value}, to=sid)
-
-            if result is Vote.YES:
-                print("vote passed!")
-            else:
-                print("vote failed.")
-            print(game.vote_manager)
-        
+            socketio.emit('game/president/pass', data=resp, to=sid)
         game.reset_vote()
+
 
 
 @socketio.on("game/chancellor/cards")

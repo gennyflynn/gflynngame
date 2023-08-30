@@ -4,6 +4,8 @@ import { GameContext } from "./GameContext";
 import { SecretHitlerContext } from "./SecretHitlerContext";
 import { Vote } from "./SecretHitler";
 import { SocketContext } from "./SocketContext";
+import { COLORS } from "../styles/colors";
+import styled from "styled-components";
 
 
 export default function Game(){
@@ -11,7 +13,9 @@ export default function Game(){
     const { name, usersInLobby, lobbyId } = useContext(GameContext);
     const { chancellor, role, hitler, partyMembership, fascists } = useContext(SecretHitlerContext);
     const { socket } = useContext(SocketContext);
-    const [president, setPresident] = useState<string | undefined>(undefined)
+    const [ president, setPresident ] = useState<string | undefined>(undefined)
+    const [ result, setResult ] = useState<Vote | undefined>()
+    const [ votes, setVotes ] = useState<Vote[]>([])
 
     function choosePresident(event: any){
         event.preventDefault()
@@ -36,24 +40,47 @@ export default function Game(){
             setPresident(data.presidentialCandidate)
             console.log("recieved president candidate ", data.presidentialCandidate)
         })
+
+        socket.on("game/president/pass", (data) => {
+            setResult(data.votePassed)
+            setVotes(data.votes)
+        })
     }, [socket])
 
-    const test = useMemo(() => {
-        return president !== undefined
-    }, [president])
+    
+    const showPresidentSelect = useMemo(() => {
+        return chancellor === name && president === undefined
+    }, [chancellor, name, president])
+
+    const showWaitingMessage = useMemo(() => {
+        return chancellor !== name && president === undefined
+    },[chancellor, name, president])
+
+    const showVoteResult = useMemo(() => {
+        return result !== undefined && votes.length === usersInLobby.length
+    }, [result, usersInLobby.length, votes.length])
+
+    const showVote = useMemo(() => {
+        return president !== undefined && !showVoteResult
+    }, [president, showVoteResult])
+
+    const votePassed = useMemo(() => {
+        return result === Vote.Yes
+    },[result])
 
 
     return (
         <div>
           <h3>Game</h3>
           <div>Chancellor - {chancellor}</div>
+          <div>President - {president}</div>
           <div>Party Membership - {partyMembership}</div>
           <div>Role - {role}</div>
           <div>Hitler - {hitler}</div>
           <div>Fascists - {fascists}</div>
       
             {/* Refactor the following part into a separate component */}
-            {chancellor === name && president === undefined ? (
+            {showPresidentSelect && (
                 <form onSubmit={choosePresident}>
                 <select id='presidentSelect' name="presidentSelect">
                     {usersInLobby.filter(user => user !== name).map(user => (
@@ -62,10 +89,10 @@ export default function Game(){
                 </select>
                 <button type="submit">Choose President</button>
                 </form>
-            ) : (
+            ) }{showWaitingMessage && (
                 <div>Waiting for {chancellor} to choose a president.</div>
             )}
-            {test && (
+            {showVote && (
                 <div>
                     <div>Vote For President {president}</div>
                     <form onSubmit={voteForPresident}>
@@ -77,10 +104,27 @@ export default function Game(){
                     </form>
                 </div>
             )}
-        </div>
+            {showVoteResult && (
+                <div>
+                    <div>Vote <VoteSpan pass={votePassed}>{votePassed ? "Passed" : "Failed"}</VoteSpan> </div>
+                    {votePassed && <h3>{president} is now president</h3>}
+                    <div>
+                        Votes:{" "}
+                        {votes.map((vote) => (
+                            <VoteSpan pass={vote === Vote.Yes}>
+                                {vote}
+                            </VoteSpan>
+                        ))}
+                    </div>
+                </div>
+            )}
+            </div>
       );
 }
 
+const VoteSpan = styled.span<{pass: boolean}>`
+    color:${({ pass }) => pass? COLORS.Green1 : COLORS.Red1};
+`
 
 
 /** Functionally what are the steps to a secret hitler game?
