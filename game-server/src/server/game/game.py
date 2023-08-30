@@ -1,13 +1,11 @@
 from dataclasses import dataclass
 from random import randint, shuffle
 from typing import List, Dict, Iterator
-
+from .vote_manager import VoteManager
 from .player_profile import PlayerProfile
-
 from .user import User
+from .enums import PartyMembership, SecretRole, Vote
 
-
-from .enums import PartyMembership, SecretRole
 from .constants import (
     NUMBER_OF_LIBERALS_PER_GAME, 
     NUMBER_OF_FASCISTS_PER_GAME, 
@@ -23,6 +21,7 @@ class Game:
     chancellor_candidate_iter: Iterator
     hitler_user_id: str
     fascists_user_ids: List[str]
+    vote_manager: VoteManager
 
     def __init__(self, users: Dict[str, User]):
         # Setup the random cards.
@@ -43,6 +42,8 @@ class Game:
         self.chancellor_candidate_iter = iter(self.users.keys())
 
         self.assign_roles()
+
+        self.vote_manager = VoteManager(len(self.users))
 
 
     def pick_a_card(self) -> PartyMembership:
@@ -96,6 +97,7 @@ class Game:
         shuffle(self.cards)
         self.card_iter = iter(self.cards)
         return next(self.card_iter)
+
     
     def chancellor_candidate(self):
         candidate = next(self.chancellor_candidate_iter, None)
@@ -105,6 +107,14 @@ class Game:
             return self.users[next(self.chancellor_candidate_iter)]
         
         return self.users[candidate]
+    
+    
+    def vote(self, vote: Vote):
+        return self.vote_manager.count_vote(vote)
+    
+    
+    def reset_vote(self):
+        self.vote_manager.reset()
 
 
     # def start_game():

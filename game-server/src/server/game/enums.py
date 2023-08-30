@@ -8,3 +8,7 @@ class SecretRole(Enum):
     HITLER = "hitler"
     FASCIST = PartyMembership.FASCIST.value
     LIBERAL = PartyMembership.LIBERAL.value
+
+class Vote(Enum):
+    YES = "Yes"
+    NO = "No"

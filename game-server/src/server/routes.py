@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import uuid1
 
-from .game.enums import PartyMembership, SecretRole
+from .game.enums import PartyMembership, SecretRole, Vote
 
 from .game.user import User
 
@@ -20,7 +20,6 @@ def handle_connect():
 @socketio.on("disconnect")
 def handle_disconnect():
     print("\n\ndisconnected\n\n")
-
 
 @socketio.on("lobby/join")
 def handle_join_lobby(sid, data):
@@ -63,14 +62,13 @@ def handle_join_lobby(sid, data):
 @socketio.on("lobby/create")
 def handle_create_lobby(sid, data):
     # refactor so that the lobby ID is returned from the lobby manager.
-    lobby_id = uuid1()
-    lobby = lobby_manager.create_lobby(str(lobby_id))
+    lobby = lobby_manager.create_lobby()
     lobby.join_lobby(User(
         sid=sid,
         name=data['name'],
     ))
-    join_room(lobby_id)
-    socketio.emit(event="lobby/create/success", data={"lobbyId": str(lobby_id)}, to=sid)
+    join_room(lobby.lobby_id)
+    socketio.emit(event="lobby/create/success", data={"lobbyId": lobby.lobby_id}, to=sid)
 
 @socketio.on("game/start")
 def handle_start_game(sid, data):
@@ -98,6 +96,84 @@ def handle_start_game(sid, data):
         }
         socketio.emit(event="game/start", data=resp, to=user.sid)
 
+
+@socketio.on("game/president/nominate")
+def handle_nominate(sid, data):
+    lobby_id = data['lobbyId']
+    lobby = lobby_manager.get_lobby(lobby_id)
+
+    if lobby:
+        # This is where I would emit to the entire room but I cannot.
+        for user in lobby.users.values():
+            # Emit back to users which candidate was nominated.
+            socketio.emit(event="game/president/nominate", data=data, to=user.sid)
+
+
+@socketio.on("game/president/vote")
+def handle_vote(sid, data):
+    lobby_id = data['lobbyId']
+    game = lobby_manager.get_lobby(lobby_id).game
+    vote = data['vote']
+    vote = Vote(str(vote))
+    result = game.vote(vote)
+
+    print(game.vote_manager)
+
+    if result:
+        # we can also just be smart on the server and know when the vote is over,
+        for sid in game.users.keys():
+            socketio.emit('game/vote/pass', data={"votePassed": result.value}, to=sid)
+
+            if result is Vote.YES:
+                print("vote passed!")
+            else:
+                print("vote failed.")
+            print(game.vote_manager)
+        
+        game.reset_vote()
+
+
+@socketio.on("game/chancellor/cards")
+def chancellor_cards(sid, data):
+    lobby_id = data['lobbyId']
+    game = lobby_manager.get_lobby(lobby_id).game 
+
+    # randomly selected cards to only go to the user who is chancellor.
+    cards = [game.pick_a_card().value for _ in range(3)]
+
+    socketio.emit("game/chancellor/cards", data={"cards": cards}, to=sid)
+
+
+@socketio.on("game/president/card")
+def president_card_pick():
+    pass
+
+
+"""
+
+
+VoteTracker():
+    liberal_cards_passed = 0
+    fascist_cards_passed = 0
+
+    def pass_card(card: PartyMembership):
+        if card == ParyMembership.LIBERAL:
+            liberal_cards_passed += 1
+        else:
+            fascist_cards_passed += 1
+
+
+    def winner() -> Optional[PartyMembership]:
+        if liberal_cards_passed == 5:
+            return PartyMemberShip.LIBERAL
+        elif fascist_cards_passed == 6:
+            return PartyMemberShip.FASCIST
+
+        return None
+    
+
+
+"""
 
 # @socketio.on("join")
 # def handle_start_game(sid, data: Optional[any]):

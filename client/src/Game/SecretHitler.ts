@@ -8,3 +8,8 @@ export enum Role {
     Fascist = "Fascist",
     Liberal = "Liberal"
 }
+
+export enum Vote {
+    Yes = "Yes",
+    No = "No"
+}

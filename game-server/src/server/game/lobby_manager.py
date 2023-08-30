@@ -1,5 +1,5 @@
 from typing import Dict
-from uuid import UUID
+from uuid import UUID, uuid1
 from .lobby import Lobby
 from .game_exceptions import GAME_EXCEPTIONS
 
@@ -10,7 +10,9 @@ class LobbyManager:
         self.lobbies = {}
         print('Created lobby manager')
 
-    def create_lobby(self, lobby_id: str):
+    def create_lobby(self):
+        lobby_id = str(uuid1())
+
         if self.get_lobby(lobby_id):
             raise Exception(msg=GAME_EXCEPTIONS.FAILED_TO_CREATE_LOBBY.value)
         lobby = Lobby(lobby_id=lobby_id)
