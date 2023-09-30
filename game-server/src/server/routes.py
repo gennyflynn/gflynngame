@@ -117,10 +117,13 @@ def handle_vote(sid, data):
     vote = Vote(str(vote))
     result = game.vote(vote)
 
+    print(f'\n\n\n{sid} voting {vote}')
+
     if result:
         resp = {"votes": [vote.value for vote in game.vote_manager.votes], "votePassed": result.value}
         for sid in game.users.keys():
             socketio.emit('game/president/pass', data=resp, to=sid)
+            print('emitting president pass', sid)
 
 
         game.reset_vote()
@@ -143,8 +146,21 @@ def president_card_pick():
     pass
 
 
-"""
+@socketio.on("game/chancellor/new")
+def get_next_chancellor(sid, data):
+    lobby_id = data['lobbyId']
+    lobby = lobby_manager.get_lobby(lobby_id)
 
+    if lobby:
+        game = lobby_manager.get_lobby(lobby_id).game
+        chancellor = game.chancellor_candidate().name
+
+        print(f'sending chancellor {chancellor} to every user')
+
+        for user in lobby.users.values():
+            socketio.emit("game/chancellor/new", data={"chancellor": chancellor}, to=user.sid)
+
+"""
 
 VoteTracker():
     liberal_cards_passed = 0

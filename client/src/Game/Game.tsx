@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext } from "react";
 // import { SocketContext } from './SocketContext';
 import { GameContext } from "./GameContext";
 import { SecretHitlerContext } from "./SecretHitlerContext";
@@ -6,25 +6,15 @@ import { SocketContext } from "./SocketContext";
 // import { COLORS } from "../styles/colors";
 // import styled from "styled-components";
 import { VoteContainer } from "./Vote";
-import { Vote } from "./SecretHitler";
+import { Vote, GameState } from "./SecretHitler";
 
-enum GameState {
-    PassPresidentCandidacy = "PassPresidentCandidacy",
-    ChancellorNominate = "ChancellorNominate",
-    GovernmentVote = "GovernmentVote",
-    PresidentSelect = "PresidentSelect",
-    LegislativeSession = "LegislativeSession"
-}
 
 
 export default function Game(){
-    // Might have to refactor into a Secret Hitler Context later. 
     const { name, usersInLobby, lobbyId } = useContext(GameContext);
-    const { chancellor, role, hitler, partyMembership, fascists, president, setPresident } = useContext(SecretHitlerContext);
+    const { chancellor, role, hitler, partyMembership, fascists, president, setPresident, gameState, setGameState, setChancellor } = useContext(SecretHitlerContext);
     const { socket } = useContext(SocketContext);
-    const [ result, setResult ] = useState<Vote | undefined>()
-    const [ votes, setVotes ] = useState<Vote[]>([])
-    const [gameState, setGameState] = useState<GameState>(GameState.PassPresidentCandidacy)
+    const [ candidate, setCandidate ] = useState("")
 
     function choosePresident(event: any){
         event.preventDefault()
@@ -38,18 +28,22 @@ export default function Game(){
 
     useEffect(() => {
         socket.on("game/president/nominate", (data) => {
-            setPresident(data.presidentialCandidate)
             console.log("recieved president candidate ", data.presidentialCandidate)
             setGameState(GameState.ChancellorNominate)
+            setCandidate(data.presidentialCandidate)
+        })
+        socket.on("game/chancellor/new", (data) => {
+            console.log('recieved chancellor', data.chancellor)
+            setChancellor(data.chancellor)
+            setCandidate("")
         })
 
-        socket.on("game/president/pass", (data) => {
-            console.log('recieved president pass', data)
-            setResult(data.votePassed)
-            setVotes(data.votes)
-        })
-    }, [setPresident, socket])
+        return () => {
+            socket.off("game/president/nominate")
+            socket.off("game/chancellor/new")
+        }
 
+    }, [setChancellor, setGameState, setPresident, socket])
 
 
     return (
@@ -64,9 +58,7 @@ export default function Game(){
           <div>Fascists - {fascists}</div>
 
             {gameState === GameState.PassPresidentCandidacy && <PresidentSelect onSubmit={choosePresident} usersInLobby={usersInLobby} name={name} chancellor={chancellor}></PresidentSelect>}
-            {gameState === GameState.ChancellorNominate && <VoteContainer votes={votes} result={result}/>}
-            
-
+            {gameState === GameState.ChancellorNominate && <VoteContainer candidate={candidate}/>}
         </div>
       );
 }

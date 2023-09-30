@@ -14,3 +14,10 @@ export enum Vote {
     No = "No"
 }
 
+export enum GameState {
+    PassPresidentCandidacy = "PassPresidentCandidacy",
+    ChancellorNominate = "ChancellorNominate",
+    GovernmentVote = "GovernmentVote",
+    PresidentSelect = "PresidentSelect",
+    LegislativeSession = "LegislativeSession"
+}

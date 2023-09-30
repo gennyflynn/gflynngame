@@ -25,7 +25,6 @@ class VoteManager():
     
     def reset(self):
         self.votes = []
-        self.num_votes = 0
 
     def __str__(self):
         return f'VoteManager(num_votes={self.num_votes}, votes={self.votes})'

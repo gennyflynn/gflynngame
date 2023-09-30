@@ -1,16 +1,13 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { SocketContext } from "./SocketContext";
-import { Vote } from "./SecretHitler";
+import { GameState, Vote } from "./SecretHitler";
 import { GameContext } from "./GameContext";
 import { SecretHitlerContext } from "./SecretHitlerContext";
 import styled from "styled-components";
 import { COLORS } from "../styles/colors";
+import Game from "./Game";
 
 
-type VoteContainerProps = {
-    votes: Vote[];
-    result: Vote | undefined;
-}
 
 enum VoteState {
     VoteForPresident = "VoteForPresident",
@@ -18,12 +15,14 @@ enum VoteState {
     VoteResult = "VoteResult"
 }
 
-export function VoteContainer({votes, result}: VoteContainerProps) {
+export function VoteContainer({candidate}: {candidate: string}) {
     const { socket } = useContext(SocketContext);
-    const { lobbyId, usersInLobby } = useContext(GameContext);
-    const { president } = useContext(SecretHitlerContext);
+    const { name, lobbyId } = useContext(GameContext);
+    const { chancellor, setGameState, setPresident, setChancellor } = useContext(SecretHitlerContext);
     const [ vote, setVote ] = useState<Vote | undefined>()
     const [ voteState, setVoteState ] = useState<VoteState>(VoteState.VoteForPresident)
+    const [ result, setResult ] = useState<Vote | undefined>()
+    const [ votes, setVotes ] = useState<Vote[]>([])
 
 
     function voteForPresident(event: any){
@@ -36,40 +35,81 @@ export function VoteContainer({votes, result}: VoteContainerProps) {
         setVoteState(VoteState.VoteWait)
     }
 
+
+    useEffect(() => {
+        const changeGameState = (pass: boolean) => {
+            console.log('why am I being called', socket.id)
+            setTimeout(() => {
+                if (pass){
+                    setGameState(GameState.GovernmentVote)
+                } else {
+                    // Need to reset game state here.
+                    setChancellor("")
+                    setPresident("")
+                    if (chancellor === name) {
+                        socket.emit("game/chancellor/new", socket.id, {
+                            'lobbyId': lobbyId,
+                        })
+                    }
+                    setGameState(GameState.PassPresidentCandidacy)
+                    setVoteState(VoteState.VoteForPresident)
+                }
+            }, 7000)
+        }
+
+        const presidentPassListener = (data: any) => {
+            console.log('recieved president pass', data)
+            setPresident(data.presidentialCandidate)
+            setResult(data.votePassed)
+            setVotes(data.votes) 
+            setVoteState(VoteState.VoteResult)
+            changeGameState(data.votePassed === Vote.Yes)
+
+        }
+
+        socket.on("game/president/pass", presidentPassListener)
+
+        return () => {
+            socket.off("game/president/pass")
+        }
+    }, [chancellor, lobbyId, name, setChancellor, setGameState, setPresident, socket])
+
     const votePassed = useMemo(() => {
         return result === Vote.Yes
     }, [result])
 
     return (
         <VoteContainerWrapper>
-            {voteState === VoteState.VoteResult && (
+            {voteState === VoteState.VoteResult ? (
                 <div>
-                    <div>Vote <VoteSpan pass={votePassed}>{votePassed ? "Passed" : "Failed"}</VoteSpan> </div>
-                    {votePassed && <h3>{president} is now president</h3>}
+                    <h4>Vote <VoteSpan pass={votePassed}>{votePassed ? "Passed" : "Failed"}</VoteSpan> </h4>
+                    {votePassed && <h3>{candidate} is now president</h3>}
                     <div>
                         Votes:{" "}
                         {votes.map((vote) => (
-                            <VoteSpan pass={vote === Vote.Yes}>
+                            <VoteSpan key={vote} pass={vote === Vote.Yes}>
                                 {vote}
                             </VoteSpan>
                         ))}
                     </div>
                 </div>
-            )}            
-            { voteState === VoteState.VoteWait &&  (
-                <div>You voted: {vote}</div>
-            )}
-            {voteState === VoteState.VoteForPresident && ( 
+            ):            
             <div>
-                <form onSubmit={voteForPresident}>
-                    <input type="radio" id="yes" name="vote" value={Vote.Yes} />
-                    <label htmlFor="yes">Yes</label>              
-                    <input type="radio" id="no" name="vote" value={Vote.No} />
-                    <label htmlFor="no">No</label>
-                    <button type="submit">Vote</button>
-                </form>
-            </div>
-            )}
+                <h4>Vote for {candidate}</h4>
+                { voteState === VoteState.VoteWait &&  (
+                    <div>You voted: {vote}</div>
+                )}
+                {voteState === VoteState.VoteForPresident && ( 
+                
+                    <form onSubmit={voteForPresident}>
+                        <input type="radio" id="yes" name="vote" value={Vote.Yes} />
+                        <label htmlFor="yes">Yes</label>              
+                        <input type="radio" id="no" name="vote" value={Vote.No} />
+                        <label htmlFor="no">No</label>
+                        <button type="submit">Vote</button>
+                    </form>
+                )}
+            </div>}
         </VoteContainerWrapper>
     )
 }
@@ -81,3 +121,4 @@ const VoteSpan = styled.span<{pass: boolean}>`
 const VoteContainerWrapper = styled.div`
     display: flex;
 `;
+
