@@ -10,7 +10,7 @@ export default function AppHome() {
     <Home className="AppHome">
       <SocketContextProvider>
         <GameContextProvider>
-          <h2>Secret Hitler</h2>
+          <h2>Secret Assassin</h2>
           <GameRouter/>
           <ConnectionState />
         </GameContextProvider>
@@ -21,4 +21,7 @@ export default function AppHome() {
 
 const Home = styled.div`
   padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;

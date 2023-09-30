@@ -121,6 +121,8 @@ def handle_vote(sid, data):
         resp = {"votes": [vote.value for vote in game.vote_manager.votes], "votePassed": result.value}
         for sid in game.users.keys():
             socketio.emit('game/president/pass', data=resp, to=sid)
+
+
         game.reset_vote()
 
 

@@ -13,3 +13,4 @@ export enum Vote {
     Yes = "Yes",
     No = "No"
 }
+

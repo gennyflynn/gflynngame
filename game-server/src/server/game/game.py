@@ -22,6 +22,7 @@ class Game:
     hitler_user_id: str
     fascists_user_ids: List[str]
     vote_manager: VoteManager
+    chancellor_user_id: str
 
     def __init__(self, users: Dict[str, User]):
         # Setup the random cards.
@@ -101,6 +102,7 @@ class Game:
     
     def chancellor_candidate(self):
         candidate = next(self.chancellor_candidate_iter, None)
+        self.chancellor_user_id = candidate
 
         if candidate is None:
             self.chancellor_candidate_iter = iter(self.users.keys())

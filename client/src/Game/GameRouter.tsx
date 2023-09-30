@@ -5,6 +5,7 @@ import Lobby from "./Lobby";
 import Home from "./Home";
 import { SecretHitlerContextProvider } from "./SecretHitlerContext";
 
+
 export default function GameRouter() {
     const { lobbyId, inGame } = useContext(GameContext);
 

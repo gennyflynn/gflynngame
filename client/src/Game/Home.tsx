@@ -12,7 +12,7 @@ export default function Home() {
     const { name, setName, setLobbyId, setUsersInLobby, setIsGameCreator } = useContext(GameContext);
     const { socket } = useContext(SocketContext);
     
-    const gameTitle = "secret hitler"
+    const gameTitle = "secret assasin"
 
     function joinLobby(event: any) {
         event.preventDefault()
