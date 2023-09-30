@@ -27,16 +27,20 @@ export default function Game(){
     }
 
     useEffect(() => {
-        socket.on("game/president/nominate", (data) => {
+        const presidentNominateListener = (data: any) => {
             console.log("recieved president candidate ", data.presidentialCandidate)
             setGameState(GameState.ChancellorNominate)
             setCandidate(data.presidentialCandidate)
-        })
-        socket.on("game/chancellor/new", (data) => {
+
+        }
+        const chancellorNewListener = (data: any) => {
             console.log('recieved chancellor', data.chancellor)
             setChancellor(data.chancellor)
             setCandidate("")
-        })
+        }
+
+        socket.on("game/president/nominate", presidentNominateListener)
+        socket.on("game/chancellor/new", chancellorNewListener)
 
         return () => {
             socket.off("game/president/nominate")
