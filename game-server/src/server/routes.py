@@ -104,6 +104,8 @@ def handle_nominate(sid, data):
 
     if lobby:
         # This is where I would emit to the entire room but I cannot.
+        # Soft setting here. This will only be used if vote passes.
+        lobby.game.president_user_id = data["presidentialCandidate"]
         for user in lobby.users.values():
             # Emit back to users which candidate was nominated.
             socketio.emit(event="game/president/nominate", data=data, to=user.sid)
@@ -135,16 +137,26 @@ def chancellor_cards(sid, data):
     lobby_id = data['lobbyId']
     game = lobby_manager.get_lobby(lobby_id).game 
 
-    # randomly selected cards to only go to the user who is chancellor.
     cards = [game.pick_a_card().value for _ in range(3)]
+    chancellor_sid = game.users[game.chancellor_user_id].sid
+    socketio.emit("game/chancellor/cards", data={"cards": cards}, to=chancellor_sid)
 
-    socketio.emit("game/chancellor/cards", data={"cards": cards}, to=sid)
+    print(f'emitting cards {cards} to {game.chancellor_user_id} / {chancellor_sid}')
 
 
-@socketio.on("game/president/card")
-def president_card_pick():
-    pass
+@socketio.on("game/chancellor/cards/discard")
+def chancellor_card_discard(sid, data):
+    lobby_id = data['lobbyId']
+    game = lobby_manager.get_lobby(lobby_id).game 
+    president_sid = game.users[game.president_user_id].sid
+    socketio.emit("game/president/cards", data=data, to=president_sid)
 
+    print(f'emitting cards {data} to {game.president_user_id} : {president_sid}')
+
+
+@socketio.on("game/president/cards/pass")
+def president_card_pick(sid, data):
+    print('recieved card to pass {data}')
 
 @socketio.on("game/chancellor/new")
 def get_next_chancellor(sid, data):

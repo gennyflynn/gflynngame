@@ -23,6 +23,7 @@ class Game:
     fascists_user_ids: List[str]
     vote_manager: VoteManager
     chancellor_user_id: str
+    president_user_id: str
 
     def __init__(self, users: Dict[str, User]):
         # Setup the random cards.
@@ -118,16 +119,3 @@ class Game:
     def reset_vote(self):
         self.vote_manager.reset()
 
-
-    # def start_game():
-    #    return True
-        # assign roles.
-        # send everyone their role.
-        # randomly pick a chancellor and emit to that player.
-        # have the player elect someone to nominate as president.
-        # game started to room = room emit(room=room)
-
-    # def player_by_name(self, name: str):
-    #     for player in self.players:
-    #         if player.name == name: 
-    #             return player

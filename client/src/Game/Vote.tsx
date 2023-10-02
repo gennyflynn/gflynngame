@@ -7,8 +7,6 @@ import styled from "styled-components";
 import { COLORS } from "../styles/colors";
 import Game from "./Game";
 
-
-
 enum VoteState {
     VoteForPresident = "VoteForPresident",
     VoteWait = "VoteWait",
@@ -38,10 +36,14 @@ export function VoteContainer({candidate}: {candidate: string}) {
 
     useEffect(() => {
         const changeGameState = (pass: boolean) => {
-            console.log('why am I being called', socket.id)
             setTimeout(() => {
                 if (pass){
-                    setGameState(GameState.GovernmentVote)
+                    setGameState(GameState.LegislativeSession)
+                    if (chancellor === name){
+                        socket.emit("game/chancellor/cards", socket.id, {
+                            'lobbyId': lobbyId,  
+                        })
+                    }
                 } else {
                     // Need to reset game state here.
                     setChancellor("")
@@ -59,12 +61,11 @@ export function VoteContainer({candidate}: {candidate: string}) {
 
         const presidentPassListener = (data: any) => {
             console.log('recieved president pass', data)
-            setPresident(data.presidentialCandidate)
+            setPresident(candidate)
             setResult(data.votePassed)
             setVotes(data.votes) 
             setVoteState(VoteState.VoteResult)
             changeGameState(data.votePassed === Vote.Yes)
-
         }
 
         socket.on("game/president/pass", presidentPassListener)
@@ -72,7 +73,7 @@ export function VoteContainer({candidate}: {candidate: string}) {
         return () => {
             socket.off("game/president/pass")
         }
-    }, [chancellor, lobbyId, name, setChancellor, setGameState, setPresident, socket])
+    }, [candidate, chancellor, lobbyId, name, setChancellor, setGameState, setPresident, socket])
 
     const votePassed = useMemo(() => {
         return result === Vote.Yes

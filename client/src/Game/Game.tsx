@@ -6,7 +6,8 @@ import { SocketContext } from "./SocketContext";
 // import { COLORS } from "../styles/colors";
 // import styled from "styled-components";
 import { VoteContainer } from "./Vote";
-import { Vote, GameState } from "./SecretHitler";
+import { GameState } from "./SecretHitler";
+import { CardSelector } from "./CardSelector";
 
 
 
@@ -63,6 +64,7 @@ export default function Game(){
 
             {gameState === GameState.PassPresidentCandidacy && <PresidentSelect onSubmit={choosePresident} usersInLobby={usersInLobby} name={name} chancellor={chancellor}></PresidentSelect>}
             {gameState === GameState.ChancellorNominate && <VoteContainer candidate={candidate}/>}
+            {gameState === GameState.LegislativeSession && <CardSelector/>}
         </div>
       );
 }
