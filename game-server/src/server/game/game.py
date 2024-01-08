@@ -119,3 +119,11 @@ class Game:
     def reset_vote(self):
         self.vote_manager.reset()
 
+    def set_president(self, user_name: str):
+        # breakpoint()
+        for user in self.users.values():
+            if user.name == user_name: 
+                self.president_user_id = user.sid
+                return user.sid
+            
+
