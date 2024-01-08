@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a lobby-based online version of the popular boardgame [Secret Hitler](https://www.secrethitler.com/)! 
+This is a lobby-based online version of the popular boardgame [Secret Hitler](https://www.secrethitler.com/)! This was made for fun to learn more about React, Websockets, and game state management. l,
 
 ## Tech stack: 
 

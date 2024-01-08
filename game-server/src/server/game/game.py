@@ -3,6 +3,7 @@ from random import randint, shuffle
 from typing import List, Dict, Iterator
 from .vote_manager import VoteManager
 from .player_profile import PlayerProfile
+from .policy_manager import PolicyManager
 from .user import User
 from .enums import PartyMembership, SecretRole, Vote
 
@@ -46,6 +47,7 @@ class Game:
         self.assign_roles()
 
         self.vote_manager = VoteManager(len(self.users))
+        self.policy_manager = PolicyManager()
 
 
     def pick_a_card(self) -> PartyMembership:
@@ -120,10 +122,10 @@ class Game:
         self.vote_manager.reset()
 
     def set_president(self, user_name: str):
-        # breakpoint()
         for user in self.users.values():
             if user.name == user_name: 
                 self.president_user_id = user.sid
                 return user.sid
             
-
+    def pass_card(self, card: PartyMembership):
+        self.policy_manager.pass_card(card)

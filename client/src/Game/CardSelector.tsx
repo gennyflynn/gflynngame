@@ -20,6 +20,7 @@ export function CardSelector() {
     const { chancellor, president } = useContext(SecretHitlerContext)
     const { name, lobbyId } = useContext(GameContext)
     const [ cards, setCards ] = useState<PartyMembership[]>([])
+    const [ passedCard, setPassedCard ] = useState('')
 
     const [selectorState, setSelectorState] = useState<SelectorState>( 
         name === chancellor ? 
@@ -42,8 +43,16 @@ export function CardSelector() {
                 'cards': cards
             })
         
-        console.log('cards now', cards)
         setSelectorState(SelectorState.Waiting)
+    }
+
+    function cardPass(event: any) {
+        event.preventDefault()
+        const cardIdx = event.target.card.value
+
+        socket.emit("game/president/cards/pass", socket.id, {'lobbyId': lobbyId, "card": cards[cardIdx]})
+
+        console.log(cards[event.target.card.value])
     }
 
     useEffect(() => {
@@ -56,11 +65,18 @@ export function CardSelector() {
             console.log('chancellor cards', data)
             setCards(data.cards)
         }
+        const cardPassListenter = (data: any) => {
+            console.log('card to pass', data.card)
+            setPassedCard(data.card)
+            setSelectorState(SelectorState.CardPassed)
+        }
         socket.on("game/president/cards", presidentCardsListener)
         socket.on("game/chancellor/cards", chancellorCardsListener)
+        socket.on("game/president/cards/pass", cardPassListenter)
         return () => {
             socket.off("game/president/cards")
             socket.off("game/chancellor/cards")
+            socket.off("game/president/cards/pass")
         }
     })
 
@@ -84,15 +100,28 @@ export function CardSelector() {
 
             {selectorState === SelectorState.PresidentSelect && (
                 <div>
-                    <div>hi {selectorState}</div>
-                    <h4>Please select a card to discard:</h4>
-                    <div>{cards}</div>
+                    <form onSubmit={cardPass}>
+                    <h4>Select a Card to Pass</h4>
+                    {cards.map((card, idx) => (
+                        <div>
+                            <input type="radio" id={`${idx}`} name="card" value={idx}></input>
+                            <label htmlFor={card}>{card}</label>
+                        </div>
+                    ))}
+                    <button type="submit">Pass</button>
+                    </form>
                 </div>
             )}
 
             {(selectorState === SelectorState.Waiting) && (
                 <div>Waiting</div>
             )}
+
+            {(selectorState === SelectorState.CardPassed && (
+                <div>Card passed {passedCard}</div>
+            )
+            )}
+
         </CardSelectContainer>
         
     )
