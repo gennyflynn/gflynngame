@@ -10,7 +10,7 @@ export default function AppHome() {
     <Home className="AppHome">
       <SocketContextProvider>
         <GameContextProvider>
-          <h2>Secret Assassin</h2>
+          <h2>Secret Hitler</h2>
           <GameRouter/>
           <ConnectionState />
         </GameContextProvider>

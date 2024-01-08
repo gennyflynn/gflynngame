@@ -5,6 +5,7 @@ import { SocketContext } from "./SocketContext";
 import styled from "styled-components";
 import { PartyMembership } from "./SecretHitler";
 // import { COLORS } from "../styles/colors";
+import { GameState } from "./SecretHitler";
 
 enum SelectorState {
     ChancellorDiscard = "ChancellorDiscard",
@@ -17,7 +18,7 @@ enum SelectorState {
 
 export function CardSelector() {
     const { socket } = useContext(SocketContext);
-    const { chancellor, president, policies, setPolicies } = useContext(SecretHitlerContext)
+    const { chancellor, president, policies, setPolicies, setChancellor, setPresident, setGameState } = useContext(SecretHitlerContext)
     const { name, lobbyId } = useContext(GameContext)
     const [ cards, setCards ] = useState<PartyMembership[]>([])
     const [ passedCard, setPassedCard ] = useState('')
@@ -65,16 +66,31 @@ export function CardSelector() {
             console.log('chancellor cards', data)
             setCards(data.cards)
         }
-        const cardPassListenter = (data: any) => {
+        const cardPassListener = (data: any) => {
             console.log('card to pass', data.card)
             setPassedCard(data.card)
             setSelectorState(SelectorState.CardPassed)
-            const policy = PartyMembership[passedCard as keyof typeof PartyMembership]
+            const policy = PartyMembership[data.card as keyof typeof PartyMembership]
             setPolicies([...policies, policy])
+            advanceGame()
         }
+        
+        const advanceGame = () => {
+            setTimeout(() => {
+                setChancellor("")
+                setPresident("")
+                if (chancellor === name) {
+                    socket.emit("game/chancellor/new", socket.id, {
+                        'lobbyId': lobbyId,
+                    })
+                }
+                setGameState(GameState.PassPresidentCandidacy)
+            }, 7000)
+        }
+
         socket.on("game/president/cards", presidentCardsListener)
         socket.on("game/chancellor/cards", chancellorCardsListener)
-        socket.on("game/president/cards/pass", cardPassListenter)
+        socket.on("game/president/cards/pass", cardPassListener)
         return () => {
             socket.off("game/president/cards")
             socket.off("game/chancellor/cards")

@@ -3,10 +3,10 @@ import React, { useState, useEffect, useContext } from "react";
 import { GameContext } from "./GameContext";
 import { SecretHitlerContext } from "./SecretHitlerContext";
 import { SocketContext } from "./SocketContext";
-// import { COLORS } from "../styles/colors";
-// import styled from "styled-components";
+import { COLORS } from "../styles/colors";
+import styled from "styled-components";
 import { VoteContainer } from "./Vote";
-import { GameState } from "./SecretHitler";
+import { GameState, PartyMembership } from "./SecretHitler";
 import { CardSelector } from "./CardSelector";
 
 
@@ -53,20 +53,17 @@ export default function Game(){
 
     return (
         <div>
-          <h3>Game</h3>
-          <div>{name}</div>
-          <div>Chancellor - {chancellor}</div>
-          <div>President - {president}</div>
-          <div>Party Membership - {partyMembership}</div>
-          <div>Role - {role}</div>
-          <div>Hitler - {hitler}</div>
-          <div>Fascists - {fascists}</div>
-          {policies.length > 1 && (
+            <h3>Game</h3>
+            <div>{name}</div>
+            <div>Chancellor - {chancellor}</div>
+            <div>President - {president}</div>
+            <div>Party Membership - {partyMembership}</div>
+            <div>Role - {role}</div>
+            <div>Hitler - {hitler}</div>
+            <div>Fascists - {fascists}</div>  
             <div>Policies Passed: 
-                {policies.map((policy, idx) => (<div key={idx}>{policy}</div>))}
+                {policies.map((policy, idx) => (<PolicySpan key={idx} fascist={policy===PartyMembership.Fascist}>{policy}</PolicySpan>))}
             </div>
-          )}
-
             {gameState === GameState.PassPresidentCandidacy && <PresidentSelect onSubmit={choosePresident} usersInLobby={usersInLobby} name={name} chancellor={chancellor}></PresidentSelect>}
             {gameState === GameState.ChancellorNominate && <VoteContainer candidate={candidate}/>}
             {gameState === GameState.LegislativeSession && <CardSelector/>}
@@ -98,3 +95,7 @@ function PresidentSelect({onSubmit, usersInLobby, name, chancellor}: SelectProps
         </div>
     )            
 }
+
+const PolicySpan = styled.span<{fascist: boolean}>`
+    color:${({ fascist }) => fascist? COLORS.Red1 : COLORS.Green1};
+`

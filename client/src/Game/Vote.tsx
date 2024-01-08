@@ -5,7 +5,6 @@ import { GameContext } from "./GameContext";
 import { SecretHitlerContext } from "./SecretHitlerContext";
 import styled from "styled-components";
 import { COLORS } from "../styles/colors";
-import Game from "./Game";
 
 enum VoteState {
     VoteForPresident = "VoteForPresident",
@@ -45,7 +44,7 @@ export function VoteContainer({candidate}: {candidate: string}) {
                         })
                     }
                 } else {
-                    // Need to reset game state here.
+                    // TODO: make this a function existing else where.
                     setChancellor("")
                     setPresident("")
                     if (chancellor === name) {

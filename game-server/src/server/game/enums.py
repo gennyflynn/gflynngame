@@ -1,8 +1,8 @@
 from enum import Enum
 
 class PartyMembership(Enum):
-    FASCIST = "fascist"
-    LIBERAL = "liberal"
+    FASCIST = "Fascist"
+    LIBERAL = "Liberal"
 
 class SecretRole(Enum):
     HITLER = "hitler"
