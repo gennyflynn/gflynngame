@@ -13,7 +13,7 @@ import { CardSelector } from "./CardSelector";
 
 export default function Game(){
     const { name, usersInLobby, lobbyId } = useContext(GameContext);
-    const { chancellor, role, hitler, partyMembership, fascists, president, setPresident, gameState, setGameState, setChancellor } = useContext(SecretHitlerContext);
+    const { chancellor, role, hitler, partyMembership, fascists, president, setPresident, gameState, setGameState, setChancellor, policies } = useContext(SecretHitlerContext);
     const { socket } = useContext(SocketContext);
     const [ candidate, setCandidate ] = useState("")
 
@@ -61,6 +61,11 @@ export default function Game(){
           <div>Role - {role}</div>
           <div>Hitler - {hitler}</div>
           <div>Fascists - {fascists}</div>
+          {policies.length > 1 && (
+            <div>Policies Passed: 
+                {policies.map((policy, idx) => (<div key={idx}>{policy}</div>))}
+            </div>
+          )}
 
             {gameState === GameState.PassPresidentCandidacy && <PresidentSelect onSubmit={choosePresident} usersInLobby={usersInLobby} name={name} chancellor={chancellor}></PresidentSelect>}
             {gameState === GameState.ChancellorNominate && <VoteContainer candidate={candidate}/>}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { GameContext } from "./GameContext";
 import { SecretHitlerContext } from "./SecretHitlerContext";
 import { SocketContext } from "./SocketContext";
@@ -17,7 +17,7 @@ enum SelectorState {
 
 export function CardSelector() {
     const { socket } = useContext(SocketContext);
-    const { chancellor, president } = useContext(SecretHitlerContext)
+    const { chancellor, president, policies, setPolicies } = useContext(SecretHitlerContext)
     const { name, lobbyId } = useContext(GameContext)
     const [ cards, setCards ] = useState<PartyMembership[]>([])
     const [ passedCard, setPassedCard ] = useState('')
@@ -69,6 +69,8 @@ export function CardSelector() {
             console.log('card to pass', data.card)
             setPassedCard(data.card)
             setSelectorState(SelectorState.CardPassed)
+            const policy = PartyMembership[passedCard as keyof typeof PartyMembership]
+            setPolicies([...policies, policy])
         }
         socket.on("game/president/cards", presidentCardsListener)
         socket.on("game/chancellor/cards", chancellorCardsListener)

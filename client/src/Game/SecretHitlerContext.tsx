@@ -9,6 +9,7 @@ export type SecretHitlerContextType = {
     hitler: string;
     fascists: string[];
     gameState: GameState,
+    policies: PartyMembership[],
     setChancellor: (chancellor: string) => void;
     setPresident: (president: string) => void;
     setPartyMembership: (partyMembership: PartyMembership) => void;
@@ -16,6 +17,7 @@ export type SecretHitlerContextType = {
     setHitler: (hitler: string) => void;
     setFascists(fascists: string[]): void;
     setGameState(state: GameState): void;
+    setPolicies(policies: PartyMembership[]): void;
 }
 
 export const SecretHitlerContext = createContext<SecretHitlerContextType>({
@@ -26,6 +28,7 @@ export const SecretHitlerContext = createContext<SecretHitlerContextType>({
     hitler: "",
     fascists: [],
     gameState: GameState.PassPresidentCandidacy,
+    policies: [],
     setChancellor: () => {},
     setPresident: () => {},
     setPartyMembership: () => {},
@@ -33,6 +36,7 @@ export const SecretHitlerContext = createContext<SecretHitlerContextType>({
     setHitler: () => {},
     setFascists: () => {},
     setGameState: () => {},
+    setPolicies: () => {},
 })
 
 export function SecretHitlerContextProvider({children}: any) {
@@ -43,6 +47,7 @@ export function SecretHitlerContextProvider({children}: any) {
     const [ hitler, setHitler ] = useState("")
     const [ fascists, setFascists ] = useState<string[]>([])
     const [ gameState, setGameState ] = useState<GameState>(GameState.PassPresidentCandidacy)
+    const [ policies, setPolicies ] = useState<PartyMembership[]>([])
 
     return (<SecretHitlerContext.Provider value={{
         chancellor,
@@ -52,13 +57,15 @@ export function SecretHitlerContextProvider({children}: any) {
         hitler,
         fascists,
         gameState,
+        policies,
         setChancellor,
         setPresident,
         setPartyMembership,
         setRole,
         setHitler,
         setFascists,
-        setGameState
+        setGameState,
+        setPolicies
     }}>{children}</SecretHitlerContext.Provider>)
 }
 
